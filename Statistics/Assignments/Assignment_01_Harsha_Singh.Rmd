@@ -1,0 +1,124 @@
+---
+title: "Assignment 1--R Programming"
+output: html_notebook
+---
+
+
+
+1.What is the basic difference and similarity between a vector and a matrix?
+
+  Difference is vector is 1-dimensional whereas matrix is 2-dimensional (dimensional attribute - row & column)
+  Similarity- Both contain values of the same data type.
+
+#########################################################################################################
+
+2.What is the basic difference and similarity between a data frame and a matrix?
+
+  Difference - dataframe can contain objects of different type,matrix only same type
+  Similarity - Both have 2 dimensions ie.,rows and columns
+
+
+3.Create a vector using (15, TRUE, “World”). What happened to your result?
+
+  It worked fine and created a Vector, coercing all to character.
+```{r}
+Mix_vector<- c(15, TRUE, "World")
+Mix_vector
+class(Mix_vector)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+4.John’s score in final semester for the three subjects (95, 91, 88). Subjects are Statistics, Linear Algebra and Calculus. Using these create a vector and give names to all elements of the vector based on their subjects.
+```{r}
+John_score<-c(95,91,88)
+Subjects<-c("Statistics","Linear Algebra","Calculus")
+names(John_score)<-Subjects
+John_score
+```
+5.Check types (character or numeric) of the vector you created.
+
+```{r}
+class(John_score)
+```
+
+
+```{r}
+class(Subjects)
+```
+6.You have three students in your class (Choose any name you want). Create a matrix using their score in above mentioned subjects (question 4) Student 1 (95, 91, 88), Student 2(96, 94, 97), Student 3(88, 98, 85). Create a matrix and also put column and row names.
+```{r}
+#3 Students score in 3 Subjects
+Jim<-c(95, 91, 88)
+Jam<-c(96, 94, 97)
+Joe<-c(88, 98, 85)
+Students<-c(Jim,Jam,Joe)
+
+Students
+
+Stud_matrix<-matrix(Students,nrow=3,byrow=TRUE)
+#Assign column names and row names
+colnames(Stud_matrix) <- Subjects
+rownames(Stud_matrix) <-c("Jim","Jam","Joe")
+Stud_matrix
+```
+```{r}
+dim(Stud_matrix)
+```
+
+7.Convert the created matrix into a data frame.
+```{r}
+Stud_df=data.frame(Stud_matrix)
+```
+
+
+```{r}
+Stud_df
+```
+
+
+8.Create three vectors using 5 countries (your choice) from the below given website. First vector should be country names, second vector should be the total number of cases and third vector should contain total number of deaths. Create a data frame using these vectors.
+```{r}
+Countries<-c("India","USA","UK","France","Italy")
+Total_number_of_cases<-c(10976388,28594476,4095269,3560764,2780882)
+Total_number_of_deaths<-c(156237,507430,119920,83964,95235)
+Corona_cases_df<-data.frame(Countries,Total_number_of_cases,Total_number_of_deaths)
+Corona_cases_df
+```
+
+
+9.Please read mtcar car dataset from R. It is an in built dataset. Check the structure of the data set. Also, if required, please convert them into their appropriate data types (character, logical, factor, etc). Save your results into a new data frame using a newname
+```{r}
+mtcars
+#structure of data set
+str(mtcars)
+```
+```{r}
+head(mtcars,10)
+```
+```{r}
+
+#Check how many different values to conclude if factors
+table(mtcars$am)
+table(mtcars$cyl)
+table(mtcars$vs)
+table(mtcars$gear)
+table(mtcars$carb)
+
+#create new df
+mtcars1<-mtcars
+str(mtcars1)
+
+#convert to factors
+mtcars1$am<-factor(mtcars$am)
+mtcars1$am<-factor(mtcars1$am)
+mtcars1$cyl<-factor(mtcars1$cyl)
+mtcars1$vs<-as.logical(mtcars1$vs)  #logical
+mtcars1$gear<-factor(mtcars1$gear)
+mtcars1$carb<-factor(mtcars1$carb)
+class(mtcars1$am)
+str(mtcars1)
+
+```
+
+.

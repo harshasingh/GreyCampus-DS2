@@ -1,0 +1,264 @@
+---
+title: "Assignment_2"
+author: "Harsha Singh"
+date: "27/02/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+
+
+```{r cars}
+summary(cars)
+```
+
+Assignment - 2
+1.Result of final world cup of football is France- 4 and Croatia – 2. Please use the control structure to print results as Team ---- Wins. ----- should be country name.
+```{r}
+Result<-c(4,2)
+names(Result)<-c("France", "Croatia")
+Result
+if (Result["France"] > Result["Croatia"]){
+  print("Team France Wins")
+} else if(Result[France]< Result["Croatia"]){
+  print("Team Croatia wins")
+}
+```
+```{r}
+France <- 4
+Croatia <- 2
+
+if (France < Croatia){
+  print("Team Croatia Wins")
+}  else {
+    print("Team France Wins")
+}
+getwd()
+```
+
+
+mtcars dataset has several factor variables. However, R is reading them numeric. Please convert them into factor using a for loop. Please use column 8 to 11 for loop.
+```{r}
+str(mtcars)
+for (row in (8:11)){
+  if(class(mtcars[[row]])!="row"){
+  mtcars[[row]]<- as.factor(mtcars[[row]])
+  }
+}
+```
+
+
+```{r}
+x=0
+for(i in 1:dim(mtcars)[2])
+{
+ if(class(mtcars[,i])=="numeric") {x=x+1}
+}
+x
+str(mtcars)
+
+```
+
+
+```{r}
+for (i in 8:11){
+  mtcars[, i] <- as.factor(mtcars[, i])
+}
+#check if converted
+```
+
+
+```{r}
+x=0
+for(i in 1:dim(mtcars)[2])
+{
+ if(class(mtcars[,i])=="factor") {x=x+1}
+}
+x
+factor_data <-factor(mtcars)
+print(factor_data)
+data(mtcars)
+
+is.factor(mtcars$gear)
+```
+
+
+```{r}
+str(mtcars)
+```
+
+Here is the Dataset 2.1 for the following question. This dataset is a subset of a real dataset.
+Let's read the data-set
+```{r}
+install.packages(readxl)
+install.packages('DT')
+####The main function in this package is datatable(). It creates an HTML widget to display R data objects with DataTables.
+
+
+library(DT)
+library(readxl)
+vehicles <- read_excel("Dataset - 2.1.xlsx")
+datatable(vehicles)
+```
+
+
+
+Write a function to get percentage of NAs in each column.
+```{r}
+count<-apply(vehicles, 2, function(x) sum(is.na(x)))
+dims<-dim(vehicles)
+dims
+dims[1]
+num<-dims[1]*dims[2]
+NApercentage<-(count/num) * 100
+print(NApercentage)
+```
+
+Write a function to get percentage of NAs in each row.
+```{r}
+count<-apply(vehicles, 1, function(x) sum(is.na(x)))
+dims<-dim(vehicles)
+dims
+dims[1]
+num<-dims[1]*dims[2]
+NApercentage<-(count/num) * 100
+print(NApercentage)
+```
+
+
+```{r}
+colSums(is.na(vehicles))
+```
+
+
+```{r}
+# writing function to create percentage
+# First step is to write a pseudo code to calculate percentage
+# (sum(is.na(x))/length(x))*100
+pMiss <- function(x){
+  (sum(is.na(x))/length(x))*100
+}
+
+missing_perc_col <- apply(vehicles, 2, pMiss)
+head(missing_perc_col)
+missing_perc_col
+```
+
+
+```{r}
+pMiss <- function(x){
+  (sum(is.na(x))/length(x))*100
+}
+
+missing_perc_row <- apply(vehicles, 1, pMiss)
+head(missing_perc_row)
+```
+
+Write a function to get summary of numeric columns (use summary function) such as THC, CO, CO2 etc. in data set. In same function try to generate boxplot using base R.
+```{r}
+find_summary<-function(column){
+  print(summary(column))
+  boxplot(column)
+}
+
+for(col in 1:ncol(vehicles)){
+  if(class(vehicles[[col]])=="numeric"){
+    find_summary(vehicles[[col]])
+  }
+}
+```
+
+Write a function to create histograms of numeric columns such as THC, CO, CO2 etc. in data set. Use ggpot2 to generate figure.
+```{r}
+install.packages("ggplot2")
+library(ggplot2)
+
+generator<- function(column){
+  ggplot(data= vehicles, aes(column),bins = 10) + 
+    geom_histogram()
+}
+generator(vehicles[[1]])
+for(col_num in 1:ncol(vehicles)){
+  if(class(vehicles[[col_num]])=="numeric"){
+    print(generator(vehicles[[col_num]]))
+  }
+}
+```
+
+
+```{r}
+data_dis <- function(x, y){
+  ggplot(x) +
+    aes(y) +
+    geom_histogram() 
+}
+
+data_dis(vehicles, vehicles$CO2)
+```
+
+Here is the Dataset 2.2 for the following question. This dataset is a subset of a real dataset.
+```{r}
+library(readr)
+FD_data = read_csv("Data set - 2.2.csv")
+str(FD_data)
+```
+
+Data set contains date columns. All of these date columns are untidy. Please create a better formatted dataset. Date should be dd/mm/yyyy in final format. Use column 2, 3 and 5 only
+```{r}
+##Observe 2,3,5 are character columns
+
+library(lubridate)
+FD_data$"First FD Date"<-mdy(FD_data$"First FD Date")
+format(FD_data$"First FD Date","%d/%m/%Y")
+
+FD_data$"Last FD Date"<-mdy(FD_data$"Last FD Date")
+format(FD_data$"Last FD Date","%d/%m/%Y")
+
+FD_data$"FD termination date"<-mdy(FD_data$"FD termination date")
+format(FD_data$"FD termination date","%d/%m/%Y")
+
+```
+
+Date of birth column contains month in string format. Please create a tidy data column with months in numeric format. Now your data should be similar to previous question.
+```{r}
+FD_data$"Date of Birth"<-dmy(FD_data$"Date of Birth")
+format(FD_data$"Date of Birth","%/%m/%Y")
+date_of_birth = dmy(FD_data$`Date of Birth`, locale = 'english')
+date_of_birth<-as.Date(FD_data$"Date of Birth", format="%d/%m/%Y")
+
+date_of_birth
+date_of_birth <- as.Date(date_of_birth, format= '%d/%m/%y')
+date_of_birth = as.Date(format(date_of_birth, '19%y%m%d'), '%Y%m%d')
+
+date_of_birth
+FD_data$`Date of Birth` <- date(as.numeric(FD_data$`Date of Birth`, "%d%m%y"))
+FD_data$`Date of Birth`
+```
+
+Convert all dates into Date format; they are currently in character variable format.
+Create a new column age based on date of birth column and First FD column. Date format is necessary to do basic arithmetic.
+```{r}
+myFun <- function(x, dummyDay = "01", dummyYear = "2013"){
+  require(lubridate)
+  x <- ifelse(substr(x, 1, 3) %in% month.abb,
+              paste(match(substr(x, 1, 3), month.abb),
+                    dummyDay,
+                    dummyYear, sep = "/"), x)
+  #return date
+  mdy(x)
+}
+
+res <- data.frame(lapply(FD_data$`Date of Birth`, myFun))
+```
+
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

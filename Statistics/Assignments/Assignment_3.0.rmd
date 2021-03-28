@@ -1,0 +1,475 @@
+---
+title: "Assignment_3"
+author: "Harsha Singh"
+date: "04/03/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+Question:1
+Please use data set COVID19.csv for next questions.  This data set is in a raw format. You have to clean this dataset before any analysis. Data set is totally raw downloaded from worldmeters today (March 1st 2021)  (https://www.worldometers.info/coronavirus/). Hence, data cleaning and manipulation are required. Please also explain your results with numerical summary as well as graphs, wherever it is applicable. Please check your data also, if it is skewed or normally distributed. Results should be based on skewness or normal distribution. 
+
+The COVID19.csv data set is raw data extracted from Worldometer (March 1st, 2021). Use COVID19.csv data to answer the questions considering the following:
+
+--> The data set requires data cleaning and manipulation before any analysis.
+--> Explain your results with a numerical summary and graphs, wherever it is applicable.
+--> The results should be based on skewness or normal distribution, therefore, do check your data if it is skewed or normally distributed.
+
+```{r}
+## Read the covid csv file dataset
+library(readr)
+getwd()
+Covid19_Data = read.csv("Covid19.csv")
+str(Covid19_Data)
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(ggpubr)
+glimpse(Covid19_Data)
+```
+
+View first 10 rows and last 10 rows to examine the data
+```{r}
+head(Covid19_Data,10)
+```
+
+```{r}
+tail(Covid19_Data,10)
+```
+We observe that the first 8 rows are not country specific info, but  overall continent wise.So drop first 8
+Same with last 8 rows which are having total calculations which is not relevant to the analysis.So drop last 8 columns too.
+First and second column removed as irrelavant.
+```{r}
+Covid19_df <- Covid19_Data[ -c(1:8,230:237),-(1:2) ]
+Covid19_df
+```
+
+```{r}
+rownames(Covid19_df) <- 1:nrow(Covid19_df)
+```
+
+Notice 16 rows deleted
+```{r}
+glimpse(Covid19_df)
+```
+
+```{r}
+Covid19_df
+```
+
+```{r}
+nrow(Covid19_df)
+```
+
+
+```{r}
+ncol(Covid19_df)
+```
+
+
+```{r}
+summary(Covid19_df$TotalCases)
+
+```
+
+View the first 10 rows
+```{r}
+head(Covid19_df,10)
+```
+View last 10
+```{r}
+tail(Covid19_df,10)
+```
+So, we observe the country specific values only there.
+Let's remove the duplicate rows now if exist
+Let's clean the data to achieve below:
+Step 1: Keep rows containing country information and remove the rest of the rows. Apart from the country, you should not be having any other row. Move on to the next step only after finishing this.
+
+
+```{r}
+Covid19_df = unique(Covid19_df)
+Covid19_df
+glimpse(Covid19_df)
+```
+
+
+```{r}
+Covid19_df[Covid19_df==""|Covid19_df==" "]<-NA
+
+```
+
+```{r}
+summary(Covid19_df)
+```
+Step 2: Calculate the missing percentage of each column using a function. If any column has missing data more than 5%, please remove it. (Do not try this for rows)
+Define function:
+
+```{r}
+missing_percent<-function(x)
+{
+  (sum(is.na(x))/length(x))*100
+}
+
+missing_col_percent <- apply(Covid19_df,2,missing_percent)
+missing_col_percent
+Covid19_df[missing_col_percent>5]
+```
+Remove new deaths
+```{r}
+Covid19_df <- subset(Covid19_df, select = -(NewDeaths))
+ncol(Covid19_df)
+```
+One column reduced
+```{r}
+colnames(Covid19_df)
+glimpse(Covid19_df)
+```
+
+Observe data has +,",",N/A
+```{r}
+head(Covid19_df,30)
+```
+
+```{r}
+```
+
+```{r}
+#Replace occurences
+Covid19_df<-data.frame(lapply(Covid19_df, gsub, pattern = ",|\\+|N/A", replacement = ""))
+Covid19_df<-data.frame(lapply(Covid19_df, gsub, pattern =" ", replacement = ""))
+
+
+Covid19_df
+```
+
+
+```{r}
+#Check first 30 rows if N/A also removed
+head(Covid19_df,30)
+
+## Can see for example row 21's N/A removed
+```
+
+
+
+Step 3: Give a better column name after cleaning your data.
+
+```{r}
+colnames(Covid19_df)[colnames(Covid19_df) %in% c("Country.Other", "TotalCases","NewCases","TotalDeaths","TotalRecovered","NewRecovered","ActiveCases","Serious.Critical","Tot.Cases.1M.pop", "Deaths.1M.pop","TotalTests", "Tests.1M.pop", "Population", "Continent","X1.Caseevery.X.ppl", "X1.Deathevery.X.ppl", "X1.Testevery.X.ppl")] <- c("Country", "Total_Cases", "New_Cases","Total_Deaths","Total_Recovered","New_Recovered","Active_Cases","Critical","Total_Cases_pmp", "Deaths_pmp","Total_Tests", "Tests_pmp", "Population", "Continent","Case every X ppl", "Death every X ppl", "Test every X ppl")
+colnames(Covid19_df)
+
+```
+```{r}
+summary(Covid19_df)
+```
+
+
+```{r}
+library(dplyr)
+    # convert to numeric 
+    Covid19_df <- Covid19_df %>%mutate_at(c(2:13,15:17), as.numeric,na.rm = TRUE)
+    Covid19_df
+```
+
+Let's convert continents to factors
+```{r}
+    Covid19_df <- Covid19_df %>%mutate_at(c(14), as.factor)
+
+```
+
+```{r}
+summary(Covid19_df)
+```
+
+
+```{r}
+class(Covid19_df$Continent)
+```
+Now Data is cleaned completely.
+
+##Let's check if data is skewed or normally distributed:
+```{r}
+##install.packages("psych")
+library(psych)
+
+##install.packages("moments")
+library(moments)
+skewness(Covid19_df[,2:13,15:17],na.rm = TRUE)
+
+```
+All the values have skewness value greater than 1, implies highly skewed
+
+
+
+---------------------------------------------------------------------------------------------------
+```{r}
+#install.packages("dlookr")
+library(dlookr)
+skewedcols<-c()
+skewedcols<-find_skewness(Covid19_df, index = FALSE)
+skewedcols
+```
+
+Let's transform data logarithmically to  create legible plots
+```{r}
+summary(Covid19_df[skewedcols])
+plot(Covid19_df$Total_Tests)
+```
+Observe that mean is greater than median for above skewed columns.
+
+For 2 columns we have min value as 0,nearing to 0 ie.Deaths_pmp and Test every X ppl
+Also for column ActiveCases we have negative min value (-62)
+Transform These first
+
+```{r}
+transformed_df<-Covid19_df
+transformed_df$`Test every X ppl`<-transform(Covid19_df$`Test every X ppl`, method = "log+1")
+
+transformed_df
+class(transformed_df)
+transformed_df[skewedcols] <- lapply(transformed_df[skewedcols], log)
+
+transformed_df$`Test every X ppl`<-transform(Covid19_df$`Test every X ppl`, method = "log+1")
+transformed_df$`Active_Cases`<-transform(Covid19_df$`Active_Cases`, method = "log+1")
+transformed_df$`Deaths_pmp`<-transform(Covid19_df$`Deaths_pmp`, method = "log+1")
+
+```
+
+```{r}
+summary(transformed_df)
+typeof(transformed_df$`Test every X ppl`)
+```
+
+1.Create plots for total cases, total death, and total recovery. Explain with a figure for each.
+All are related to human --> therefore they are discrete data
+
+```{r}
+library(ggplot2)    
+?ggplot
+##install.packages("ggpubr")
+library("ggpubr")
+```
+
+
+```{r}
+ggdensity(Covid19_df, x = "Total_Cases",fill = "#0073C2FF", color = "#0073C2FF",add = "mean", rug = TRUE)
+```
+
+```{r}
+#For normally disributed data we can see, values above 10power of x are more distributed 
+ggdensity(transformed_df, x = "Total_Cases",fill = "#0073C2FF", color = "#0073C2FF",add = "mean", rug = TRUE)
+```
+
+```{r}
+##For continuous variable, you can visualize the distribution of the variable using density plots
+ggdensity(Covid19_df, x = "Total_Deaths",fill = "#0073C2FF", color = "#0073C2FF",add = "mean", rug = TRUE)
+```
+
+
+
+
+```{r}
+#For normally distributed data we can see, values above 10power of x are more distributed 
+ggdensity(transformed_df, x = "Total_Deaths",fill = "#0073C2FF", color = "#0073C2FF",add = "mean", rug = TRUE)
+```
+
+```{r}
+ggdensity(Covid19_df, x = "Total_Recovered",fill = "#0073C2FF", color = "#0073C2FF",add = "mean", rug = TRUE)
+```
+
+
+```{r}
+#For normally disributed data we can see, values above 10power of x are more distributed 
+ggdensity(transformed_df, x = "Total_Recovered",fill = "#0073C2FF", color = "#0073C2FF",add = "mean", rug = TRUE)
+```
+
+```{r}
+transformed_df$`Test every X ppl`
+ggdensity(transformed_df, x = "Test every X ppl",fill = "#0073C2FF", color = "#0073C2FF", rug = TRUE)
+summary(transformed_df$`Test every X ppl`)
+median(transformed_df$`Test every X ppl`,na.rm = TRUE)
+mean(transformed_df$`Test every X ppl`,na.rm = TRUE)
+
+summary(Covid19_df$`Total Cases`)
+```
+
+
+
+```{r}
+##install.packages("Hmisc")
+library(Hmisc)
+num_data <-Covid19_df[, sapply(Covid19_df, is.numeric)] 
+hist(num_data,na.rm=T)
+```
+
+```{r}
+hist(Covid19_df[,2:13,15:17],na.rm = TRUE)
+```
+From above graphs we can infer data is right skewed completely.
+Create a plot to examine the correlation between total cases and total population. Explain if there is any correlation between total cases and total population.
+
+```{r}
+library(ggplot2)
+library(ggpubr)
+
+ggscatter(Covid19_df, x="Total_Cases",y="Population", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Total_Cases", ylab = "Population",main="Correlation between total cases and total population")
+```
+
+
+```{r}
+ggscatter(transformed_df, x="Total_Cases",y="Population", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Total_Cases", ylab = "Population",main="Correlation between total cases and total population")
+```
+From above graphs we can conclude positive correlation.On skewed data correlation is at lower values but when normally distributed we can see increase in population implies increase in cases.
+
+Create a plot to examine the correlation between Tot Cases/1M pop and total population. Explain if there is any correlation between them?
+
+```{r}
+Covid19_df$Total_Cases_pmp
+ggscatter(Covid19_df, x="Total_Cases_pmp",y="Population", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Total_Cases", ylab = "Population",main="Correlation between total cases per million pop and total population")
+
+```
+
+```{r}
+ggscatter(transformed_df, x="Total_Cases_pmp",y="Population", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Total_Cases", ylab = "Population",main="Correlation between total cases per million pop and total population")
+```
+No correlation between total_cases/1M Pop and population.
+
+
+Which column do you feel is better for comparison purposes, total cases or TotCases/1M pop. Explain.
+Answer:TotCases/1M pop is better
+Because it groups cases per million population and gives clear info and can infer no correlation.
+The total cases column correlates with population but it is not clearly generalising.
+
+Create a plot to examine the correlation between total cases and total death. Explain the figure.
+
+```{r}
+Covid19_df$Total_Cases
+ggscatter(Covid19_df, x="Total_Cases",y="Total_Deaths", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Total_Cases", ylab = "Population",main="Correlation between Total cases and Total deaths")
+```
+
+```{r}
+ggscatter(transformed_df, x="Total_Cases",y="Total_Deaths", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Total_Cases", ylab = "Total_Deaths",main="Correlation between total cases and total population")
+```
+There is a very high positive correlation here.Implies as cases increase the chances of deaths also increase,After all COVID is a huge pandemic.
+
+
+Create a plot to examine the correlation between total cases and Deaths/1M pop. Explain the figure. Which column is more suitable to compare the result, total death or Death/1Mpop?
+
+```{r}
+ggscatter(Covid19_df, x="Total_Cases",y="Deaths_pmp", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Total_Cases", ylab = "Deaths_pmp",main="Correlation between Total cases and Deaths_pmp")
+```
+
+In the above skewed data's plot, we see there is not much of significant correlation as data lies at lower value.
+Let's examine the normaL distributed data's plot
+```{r}
+ggscatter(transformed_df, x="Total_Cases",y="Deaths_pmp", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Total_Cases", ylab = "Deaths_pmp",main="Correlation between Total cases and Deaths_pmp")
+```
+We can see more data points are scattered in the plot when compared on the line.So not a correlation between them.
+
+The total Deaths_pmp gives a clear picture as we see outliers of deaths cases when number of cases are low too.So it is a good option to correlated compared to total_deaths column
+______________________
+
+Compare Tot Cases/1M pop by continent, and explain your result. 
+```{r}
+levels(Covid19_df$Continent)
+boxplot(Total_Cases_pmp ~ Continent, data = Covid19_df,na.exclude(Covid19_df$Continent),main = "Total Cases/1M pop by continent",col = "orange", frame = FALSE)
+
+ggplot(Covid19_df, aes(x=Continent, y= Total_Cases_pmp),color="blue", fill="orange") +   geom_boxplot(outlier.colour="red",fill='#F2A7A4', color="blue") + theme_classic() + scale_fill_brewer(palette="Dark2")
+
+```
+
+```
+Notice 3 things:
+
+1.Europe has highest total number of cases per million pop
+2.Austraila/Ocenia has the least
+3.Africa has high number Of outliers
+
+```{r}
+ggplot(transformed_df, aes(x=Continent, y= Total_Cases_pmp),color="blue", fill="orange",frame = FALSE) +geom_boxplot(outlier.colour="red",fill='#AA4371', color="blue") + theme_classic() + scale_fill_brewer(palette="Dark2")
+```
+Compare Deaths/1M pop by continent, and explain your result. 
+
+```{r}
+ggplot(Covid19_df, aes(x=Continent, y= Deaths_pmp),color="blue", fill="orange") +   geom_boxplot(outlier.colour="red",fill='#F2A7A4', color="blue") + theme_classic() + scale_fill_brewer(palette="Dark2")
+```
+
+
+Notice 3 things:
+
+1.Europe has highest death cases per million pop
+2.Austraila/Ocenia has the least
+3.Africa has high number Of outliers
+
+
+Which country is best among testing the COVID19 and which country is worst? There are two columns total test vs. test/M. Choose appropriate column. 
+```{r}
+
+barplot(`Tests_pmp` ~ `Country`,data=Covid19_df, las=2)
+barplot(`Total_Tests` ~ `Country`,data=Covid19_df, las=2)
+
+```
+
+Total_Tests does noy give clear picture so we consider tests_pmp which has weak correlation to population
+```{r}
+
+Covid19_df$Country[which.max(Covid19_df$`Tests_pmp`)]
+```
+
+best among testing the COVID19 is Gibraltar
+```{r}
+Covid19_df$Country[which.min(Covid19_df$`Tests_pmp`)]
+```
+Worst among testing the COVID19 is Yemen
+Compare your COVID19 test results by continent? There are two columns total test vs test/M. Choose appropriate column. 
+```{r}
+ggplot(data=Covid19_df, aes(x=Continent, y=Total_Tests),frame=TRUE) +
+  geom_bar(stat="identity", fill="brown")+
+  theme_minimal()
+```
+
+cHOOSE Tests_pmp as we already saw it has no significant correlation with population
+Highest number of tests EUROPE has conducted.Australia is the least
+```{r}
+ggplot(data=Covid19_df, aes(x=Continent, y=Tests_pmp)) +
+  geom_bar(stat="identity", fill="steelblue")+
+  theme_minimal()
+```
+
+
+Check if Tests/1M pop is skewed or normally distributed.
+```{r}
+ggdensity(Covid19_df, x = "Tests_pmp",fill = "#0073C2FF", color = "#0073C2FF",add = "mean", rug = TRUE)
+```
+
+It is clearly highly right skewed.
