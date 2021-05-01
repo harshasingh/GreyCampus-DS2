@@ -32,7 +32,7 @@ SELECT f.facid,SUM(b.slots) AS "Total Slots"
 FROM cd.facilities AS f
 INNER JOIN cd.bookings b
 ON f.facid=b.facid
-WHERE b.starttime >= '2012-09-01'
+WHERE b.starttime >= '2012-09-01' AND b.starttime<'2012-10-01'
 GROUP BY f.facid
 ORDER BY "Total Slots";
 
